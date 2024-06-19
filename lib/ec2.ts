@@ -12,18 +12,18 @@ export class Ec2Stack extends Stack {
     public readonly instance: Instance;
     constructor(scope: Construct, id: string, props: Ec2Prods) {
         super(scope, id, props);
-        const role_stack = new Ec2RoleStack(this, "EC2_Instance_Role", {});
+        const role_stack = new Ec2RoleStack(this, "EC2_Instance_Role", { env: props.env });
         this.instance = new Instance(this, 'Instance', {
             vpc: props.vpc,
             instanceType: new InstanceType('t2.micro'),
-            machineImage: MachineImage.latestAmazonLinux2023(), 
+            machineImage: MachineImage.latestAmazonLinux2023(),
             role: role_stack.role,
             vpcSubnets: {
-              subnetType: SubnetType.PUBLIC,
+                subnetType: SubnetType.PUBLIC,
             },
             securityGroup: props.sg,
-          });
-          const userDataScript = `#!/bin/bash
+        });
+        const userDataScript = `#!/bin/bash
 sudo yum update -y
 sudo yum install -y ruby
 sudo yum install -y wget
@@ -34,7 +34,7 @@ sudo ./install auto
 sudo systemctl start codedeploy-agent
 sudo systemctl enable codedeploy-agent
       `;
-          this.instance.addUserData(userDataScript);
-          Tags.of(this.instance).add('App', 'website');
+        this.instance.addUserData(userDataScript);
+        Tags.of(this.instance).add('App', 'website');
     }
 }
