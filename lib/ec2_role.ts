@@ -2,7 +2,7 @@
 import { Stack, StackProps, Tags } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Role } from 'aws-cdk-lib/aws-iam';
-import { ServicePrincipal, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
+import { ServicePrincipal, ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 export class Ec2RoleStack extends Stack {
     readonly role: Role;
@@ -14,5 +14,15 @@ export class Ec2RoleStack extends Stack {
         });
         this.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonS3ReadOnlyAccess'));
         this.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AWSCodeDeployFullAccess'));
+        this.role.addToPolicy(new PolicyStatement({
+            actions: [
+                'codedeploy:CreateDeployment',
+                'codedeploy:GetDeployment',
+                'codedeploy:RegisterApplicationRevision',
+                'codedeploy:GetApplication',
+                'codedeploy:GetApplicationRevision',
+            ],
+            resources: ['*'],
+        }));
     }
 }
