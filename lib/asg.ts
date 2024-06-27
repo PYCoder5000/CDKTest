@@ -4,6 +4,7 @@ import { Vpc, SubnetType, InstanceType, MachineImage, SecurityGroup, UserData, P
 import { AutoScalingGroup, HealthCheck, UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
 import { Ec2RoleStack } from './ec2_role';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 
 export interface ASGProds extends StackProps {
@@ -57,9 +58,13 @@ export class ASGStack extends Stack {
             securityGroup: albAsgSecurityGroup,
         });
 
+        const cert_arn = 'arn:aws:acm:us-west-2:992382556533:certificate/839c5a93-8a1f-45cd-bc07-1b044563cae2';
+        const cert = Certificate.fromCertificateArn(this, 'Certificate', cert_arn);
+
         const listener = this.alb.addListener('Listener', {
-            port: 80,
+            port: 443,
             open: true,
+            certificates: [cert],
         });
 
         listener.addTargets('Target', {
