@@ -14,7 +14,7 @@ export class CicdStack extends cdk.Stack {
     super(scope, id, props);
 
     const bucket = new Bucket(this, 'MyDeploymentBucket', {
-      bucketName: "website-cicd-bucket-ruifc",
+      bucketName: "raptor-rider-chicken-bucket",
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 

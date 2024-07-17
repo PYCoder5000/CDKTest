@@ -58,11 +58,11 @@ export class ASGStack extends Stack {
             securityGroup: albAsgSecurityGroup,
         });
 
-        const cert_arn = 'arn:aws:acm:us-west-2:992382556533:certificate/839c5a93-8a1f-45cd-bc07-1b044563cae2';
+        const cert_arn = 'arn:aws:acm:us-east-1:637423383764:certificate/238bd0d6-f0b6-4df9-ac05-205a197dfe49';
         const cert = Certificate.fromCertificateArn(this, 'Certificate', cert_arn);
 
         const listener = this.alb.addListener('Listener', {
-            port: 443,
+            port: 443, 
             open: true,
             certificates: [cert],
         });

@@ -14,7 +14,7 @@ export class Route53Stack extends Stack {
         super(scope, id, props);
 
         const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-            domainName: 'ailec.me',
+            domainName: 'chrisjin.org',
         });
 
         new route53.ARecord(this, 'MyARecord', {
