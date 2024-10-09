@@ -21,8 +21,19 @@ export class Ec2RoleStack extends Stack {
                 'codedeploy:RegisterApplicationRevision',
                 'codedeploy:GetApplication',
                 'codedeploy:GetApplicationRevision',
+                'dynamodb:BatchGetItem',
+                'dynamodb:BatchWriteItem',
+                'dynamodb:DeleteItem',
+                'dynamodb:GetItem',
+                'dynamodb:PutItem',
+                'dynamodb:Query',
+                'dynamodb:Scan',
+                'dynamodb:UpdateItem',
+                'ses:SendEmail',
+                'ses:SendRawEmail',
             ],
             resources: ['*'],
         }));
+        
     }
 }
