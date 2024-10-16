@@ -13,37 +13,53 @@ export class ChatAppStack extends cdk.Stack {
         const table = new dynamodb.Table(this, 'ConnectionsTable', {
             partitionKey: { name: 'ConnectionId', type: dynamodb.AttributeType.STRING },
         });
-
+        const history_table = new dynamodb.Table(this, 'HistoryTable', {
+            partitionKey: { name: 'MessageID', type: dynamodb.AttributeType.STRING },
+            sortKey: { name: 'Timestamp', type: dynamodb.AttributeType.NUMBER},
+            timeToLiveAttribute: 'TTL',
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+        });
         const connectHandler = new lambda.Function(this, 'ConnectHandler', {
             runtime: lambda.Runtime.PYTHON_3_9,
             code: lambda.Code.fromAsset('lambda'),
             handler: 'connect.handler',
             environment: {
                 TABLE_NAME: table.tableName,
+                HISTORY_TABLE_NAME: history_table.tableName,
             },
         });
-
         const disconnectHandler = new lambda.Function(this, 'DisconnectHandler', {
             runtime: lambda.Runtime.PYTHON_3_9,
             code: lambda.Code.fromAsset('lambda'),
             handler: 'disconnect.handler',
             environment: {
                 TABLE_NAME: table.tableName,
+                HISTORY_TABLE_NAME: history_table.tableName,
             },
         });
-
         const messageHandler = new lambda.Function(this, 'MessageHandler', {
             runtime: lambda.Runtime.PYTHON_3_9,
             code: lambda.Code.fromAsset('lambda'),
             handler: 'message.handler',
             environment: {
                 TABLE_NAME: table.tableName,
+                HISTORY_TABLE_NAME: history_table.tableName,
             },
+        });
+
+        history_table.addGlobalSecondaryIndex({
+            indexName: 'TimestampIndex',
+            partitionKey: { name: 'SecondaryPartitionKey', type: dynamodb.AttributeType.STRING },
+            sortKey: { name: 'Timestamp', type: dynamodb.AttributeType.NUMBER },
+            projectionType: dynamodb.ProjectionType.ALL,
         });
 
         table.grantReadWriteData(connectHandler);
         table.grantReadWriteData(disconnectHandler);
         table.grantReadWriteData(messageHandler);
+        history_table.grantWriteData(messageHandler);
+        history_table.grantReadData(connectHandler);
+
         const policy = new iam.PolicyStatement({
             actions: ['execute-api:ManageConnections'],
             resources: ['*'],

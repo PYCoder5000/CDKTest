@@ -1,6 +1,8 @@
 import os
 import json
 import boto3
+import uuid
+import time
 
 def handler(event, context):
     body = json.loads(event.get('body', '{}'))
@@ -11,13 +13,19 @@ def handler(event, context):
 
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(os.environ['TABLE_NAME'])
+    history_table = dynamodb.Table(os.environ['HISTORY_TABLE_NAME'])
 
     try:
         response = table.scan(ProjectionExpression='ConnectionId')
         items = response.get('Items', [])
 
         apigw_management_api = boto3.client('apigatewaymanagementapi', endpoint_url=f"https://{domain_name}/{stage}")
-
+        history_table.put_item(Item={'MessageID': str(uuid.uuid4(message)), 
+                                    'Timestamp': int(time.time()),
+                                    'Message': message,
+                                    'Sender': connection_id,
+                               }
+        )
         for item in items:
             client_id = item['ConnectionId']
             try:
